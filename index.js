@@ -16,8 +16,8 @@ app.use(cors());
 // Middleware para parsear JSON
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.redirect('/rutinas');
+app.get('https://gym-cei-proyecto.onrender.com/', (req, res) => {
+    res.redirect('https://gym-cei-proyecto.onrender.com/rutinas');
 });
 
 app.use(cors({
@@ -25,7 +25,7 @@ app.use(cors({
 }));
 
 // Rutas
-app.get('/rutinas', async (req, res) => {
+app.get('https://gym-cei-proyecto.onrender.com/rutinas', async (req, res) => {
     try{
         let contenido = await leerRutinas();
         res.json(contenido);
@@ -35,7 +35,7 @@ app.get('/rutinas', async (req, res) => {
     }
 });
 
-app.post('/rutinas/crear', async (req, res) => {
+app.post('https://gym-cei-proyecto.onrender.com/rutinas/crear', async (req, res) => {
     let {nombre, descripcion, ejercicios, status} = req.body;
     try{
         let resultado = await crearRutina(nombre, descripcion, ejercicios, status);
@@ -46,7 +46,7 @@ app.post('/rutinas/crear', async (req, res) => {
     }
 });
 
-app.put("/rutinas/actualizar/:id", async (req, res) => {
+app.put("https://gym-cei-proyecto.onrender.com/rutinas/actualizar/:id", async (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, ejercicios } = req.body;
     console.log("Datos recibidos en el backend:", req.body);
@@ -88,7 +88,7 @@ app.put("/rutinas/actualizar/:id", async (req, res) => {
 
   
 
-app.put('/rutinas/editarStatus/:id', async (req, res) => {
+app.put('https://gym-cei-proyecto.onrender.com/rutinas/editarStatus/:id', async (req, res) => {
     const { id } = req.params;
     let {status} = req.body;
     try {
@@ -100,7 +100,7 @@ app.put('/rutinas/editarStatus/:id', async (req, res) => {
     }
 });
 
-app.delete('/rutinas/:id', async (req, res) => {
+app.delete('https://gym-cei-proyecto.onrender.com/rutinas/:id', async (req, res) => {
     const { id } = req.params;
     try {
       const resultado = await deleteRutina(id);
@@ -113,5 +113,5 @@ app.delete('/rutinas/:id', async (req, res) => {
 // Iniciar el servidor
 const PORT = 4000;
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo`);
 });
