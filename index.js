@@ -86,8 +86,6 @@ app.put("/rutinas/actualizar/:id", async (req, res) => {
 });
 
 
-  
-
 app.put('/rutinas/editarStatus/:id', async (req, res) => {
     const { id } = req.params;
     let {status} = req.body;
@@ -111,7 +109,7 @@ app.delete('/rutinas/:id', async (req, res) => {
   });
   
 // Iniciar el servidor
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

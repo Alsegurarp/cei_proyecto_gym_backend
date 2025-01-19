@@ -82,38 +82,6 @@ export async function updateRutina(id, nombre, descripcion, ejercicios) {
         }  
     });
 }
-/*
-export async function updateRutina(id, nombre, descripcion, ejercicios) {
-    const conexion = conectar(); // Conectar a la base de datos
-    console.log("Conexión exitosa:", conexion);
-  
-    try {
-      // Ejecutar la consulta para actualizar la rutina
-      const respuesta = await conexion.query(
-        `UPDATE rutinas
-         SET nombre = $1, descripcion = $2, ejercicios = $3
-         WHERE id = $4
-         RETURNING *`,
-        [nombre, descripcion, JSON.stringify(ejercicios), id] // Valores de la consulta
-      );
-  
-      // Validar si se encontraron filas
-      if (respuesta.rows.length > 0) {
-        return { success: true, data: respuesta.rows[0] }; // Retornar los datos actualizados
-      } else {
-        return { success: false, error: "No se encontró la rutina a actualizar" };
-      }
-    } catch (error) {
-      console.error("Error en updateRutina:", error);
-      return { success: false, error: "Error en la base de datos" }; // Manejar el error
-    } finally {
-      conexion.end(); // Cerrar la conexión
-    }
-  }
-*/  
-
-  
-//updateRutina es un .put que se encarga de modificar una rutina de ejercicios, el primer valor es el id de la rutina, el segundo valor es el nombre de la rutina, el tercer valor es la descripcion de la rutina
 
 export function editarStatus(id, status){
     return new Promise( async (ok,ko) => {
@@ -129,4 +97,4 @@ export function editarStatus(id, status){
             }
     });
 }
-//Editar el status de la rutina.
+
