@@ -15,43 +15,57 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Crear la conexión a la base de datos con SSL habilitado
+// Updated PostgreSQL connection configuration for Render deployment
 const sql = postgres(process.env.DATABASE_URL, {
-  ssl: {
-    rejectUnauthorized: false, // Esto permite la conexión aunque no se verifique el certificado
-  },
+  ssl: process.env.NODE_ENV === 'production' ? { 
+    rejectUnauthorized: true,
+    require: true
+  } : false,
+  max: 10, // Connection pool size
+  idle_timeout: 20,
+  connect_timeout: 10
 });
 
-// Habilitar CORS
-app.use(cors());
+// Updated CORS configuration for production
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-frontend-domain.com'] // Replace with your actual frontend domain
+    : ['http://localhost:3000', 'http://localhost:4000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Rutas
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
+
+// Rest of your routes remain the same
 app.get('/', (req, res) => {
   res.redirect('/rutinas');
 });
 
-app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:4000"],
-}));
-
-// Rutas
 app.get('/rutinas', async (req, res) => {
   try {
-    let contenido = await leerRutinas(sql);  // Asegúrate de pasar la conexión
+    let contenido = await leerRutinas(sql);
     res.json(contenido);
   } catch (error) {
-    res.status(500).json({ error: "error en la base de datos" });
+    console.error('Database error:', error);
+    res.status(500).json({ error: "Error en la base de datos" });
   }
 });
 
 app.post('/rutinas/crear', async (req, res) => {
   let { nombre, descripcion, ejercicios, status } = req.body;
   try {
-    let resultado = await crearRutina(sql, nombre, descripcion, ejercicios, status); // Pasar la conexión
+    let resultado = await crearRutina(sql, nombre, descripcion, ejercicios, status);
     res.status(201).json(resultado);
   } catch (error) {
-    res.status(500).json({ error: "error en la base de datos" });
+    console.error('Database error:', error);
+    res.status(500).json({ error: "Error en la base de datos" });
   }
 });
 
@@ -83,6 +97,7 @@ app.put("/rutinas/actualizar/:id", async (req, res) => {
       return res.status(404).json(result);
     }
   } catch (error) {
+    console.error('Database error:', error);
     return res.status(500).json({ error: "Error en la base de datos" });
   }
 });
@@ -94,6 +109,7 @@ app.put('/rutinas/editarStatus/:id', async (req, res) => {
     const resultado = await editarStatus(sql, id, status);
     res.json(resultado);
   } catch (error) {
+    console.error('Database error:', error);
     res.status(500).json(error);
   }
 });
@@ -104,11 +120,11 @@ app.delete('/rutinas/:id', async (req, res) => {
     const resultado = await deleteRutina(sql, id);
     res.json(resultado);
   } catch (error) {
+    console.error('Database error:', error);
     res.status(500).json(error);
   }
 });
 
-// Iniciar el servidor
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
