@@ -8,6 +8,7 @@ import {
 } from './database.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import postgres from 'postgres';
 
 dotenv.config();
 
@@ -15,17 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Updated PostgreSQL connection with correct SSL configuration for Render
-const sql = postgres({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME,
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
-    },
-  });
+
 
 function conectar(){
     return postgres({
