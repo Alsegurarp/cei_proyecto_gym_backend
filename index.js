@@ -7,7 +7,11 @@ import {
   editarStatus
 } from './database.js';
 import cors from 'cors';
-import { Client } from 'pg'; // Usamos import en lugar de require
+import pkg from 'pg'; // Usamos import por defecto
+const { Client } = pkg;
+import dotenv from 'dotenv'; //variables de entorno
+dotenv.config();
+
 
 const client = new Client({
     connectionString: process.env.DATABASE_URL,
