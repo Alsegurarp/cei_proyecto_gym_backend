@@ -15,70 +15,77 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
 
-// Updated PostgreSQL connection with correct SSL configuration for Render
-
-
-function conectar(){
-    return postgres(process.env.DATABASE_URL, {
-        ssl:{
-            rejectUnauthorized: false,  // No rechaza SSL sin autorizacion
+// Updated PostgreSQL connection for Render
+function conectar() {
+    return postgres({
+        host: 'dpg-cu6iikrtq21c7387r370-a.frankfurt-postgres.render.com',
+        database: 'base_de_datos_gym_cei',
+        username: 'base_de_datos_gym_cei_user',
+        password: 'Q7x0AgXV3DEaVQ4RB5gHDiBaGfvkhLWp',
+        port: 5432,
+        ssl: {
+            rejectUnauthorized: false
         },
     });
-} 
+}
 
-// Habilitar CORS
-app.use(cors());
+// CORS configuration
+app.use(cors({
+    origin: ["http://localhost:3000", "https://cei-proyecto-gym-backend.onrender.com"],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
 
-// Middleware para parsear JSON
+// Middleware for parsing JSON
 app.use(express.json());
 
+// Default route
 app.get('/', (req, res) => {
     res.redirect('/rutinas');
 });
 
-app.use(cors({
-    origin: ["http://localhost:3000", "https://cei-proyecto-gym-backend.onrender.com"],
-}));
-
-// Rutas
+// Routes
 app.get('/rutinas', async (req, res) => {
-    let conexion = conectar();
-    try{
+    let conexion = null;
+    try {
+        conexion = conectar();
         let contenido = await leerRutinas();
         res.json(contenido);
-    }catch(error){
-        res.json({error: "error en la base de datos"})
-        res.status(500);
-    }finally{
-        conexion.end();
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ error: "Error en la base de datos" });
+    } finally {
+        if (conexion) {
+            await conexion.end();
+        }
     }
 });
 
 app.post('/rutinas/crear', async (req, res) => {
-    let conexion = conectar();
-    let {nombre, descripcion, ejercicios, status} = req.body;
-    try{
+    let conexion = null;
+    const { nombre, descripcion, ejercicios, status } = req.body;
+    try {
+        conexion = conectar();
         let resultado = await crearRutina(nombre, descripcion, ejercicios, status);
         res.status(201).json(resultado);
-    }catch(error){
-        res.json({error: "error en la base de datos"})
-        res.status(500).json(error);
-    }finally{
-        conexion.end();
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ error: "Error en la base de datos" });
+    } finally {
+        if (conexion) {
+            await conexion.end();
+        }
     }
 });
 
 app.put("/rutinas/actualizar/:id", async (req, res) => {
-    let conexion = conectar();
+    let conexion = null;
     const { id } = req.params;
     const { nombre, descripcion, ejercicios } = req.body;
-    console.log("Datos recibidos en el backend:", req.body);
-
-    // Validar si los ejercicios están en formato de cadena JSON
+    
     let ejerciciosParsed = ejercicios[0];
     if (typeof ejercicios === "string") {
         try {
-            // Intentamos parsear los ejercicios si vienen como una cadena
             ejerciciosParsed = JSON.parse(ejercicios);
             if (!Array.isArray(ejerciciosParsed)) {
                 throw new Error("Ejercicios no son un array válido");
@@ -90,57 +97,59 @@ app.put("/rutinas/actualizar/:id", async (req, res) => {
     }
 
     if (!id || !nombre || !descripcion || !ejerciciosParsed) {
-        console.error("Datos inválidos:", { id, nombre, descripcion, ejerciciosParsed });
         return res.status(400).json({ success: false, error: 'Faltan datos requeridos' });
     }
 
     try {
+        conexion = conectar();
         const result = await updateRutina(id, nombre, descripcion, ejerciciosParsed);
-
-        if (result.success) {
-            return res.status(200).json(result); // Rutina actualizada correctamente
-        } else {
-            return res.status(404).json(result); // Rutina no encontrada
-        }
+        res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
         console.error("Error al actualizar la rutina:", error);
-        return res.status(500).json({ success: false, error: "Error en la base de datos" });
-    } finally{
-        conexion.end();
+        res.status(500).json({ success: false, error: "Error en la base de datos" });
+    } finally {
+        if (conexion) {
+            await conexion.end();
+        }
     }
 });
 
-
 app.put('/rutinas/editarStatus/:id', async (req, res) => {
-    let conexion = conectar();
+    let conexion = null;
     const { id } = req.params;
-    let {status} = req.body;
+    const { status } = req.body;
     try {
+        conexion = conectar();
         const resultado = await editarStatus(id, status);
         res.json(resultado);
     } catch (error) {
-        res.json({error: "error en la base de datos"})
-        res.status(500).json(error);
-    }finally{
-        conexion.end();
+        console.error('Database error:', error);
+        res.status(500).json({ error: "Error en la base de datos" });
+    } finally {
+        if (conexion) {
+            await conexion.end();
+        }
     }
 });
 
 app.delete('/rutinas/:id', async (req, res) => {
-    let conexion = conectar();
+    let conexion = null;
     const { id } = req.params;
     try {
-      const resultado = await deleteRutina(id);
-      res.json(resultado);
+        conexion = conectar();
+        const resultado = await deleteRutina(id);
+        res.json(resultado);
     } catch (error) {
-      res.status(500).json(error);
-    } finally{
-        conexion.end();
+        console.error('Database error:', error);
+        res.status(500).json({ error: "Error en la base de datos" });
+    } finally {
+        if (conexion) {
+            await conexion.end();
+        }
     }
-  });
-  
-// Iniciar el servidor
+});
 
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+// Start server with proper port binding for Render
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Servidor corriendo en el puerto ${port}`);
 });
