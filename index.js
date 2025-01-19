@@ -7,9 +7,7 @@ import {
   editarStatus
 } from './database.js';
 import cors from 'cors';
-import pkg from 'pg';
-
-const {Client} = pkg;
+import { Client } from 'pg'; // Usamos import en lugar de require
 
 const client = new Client({
     connectionString: process.env.DATABASE_URL,
