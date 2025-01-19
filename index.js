@@ -20,7 +20,9 @@ const port = process.env.PORT || 4000;
 
 function conectar(){
     return postgres(process.env.DATABASE_URL, {
-        ssl: true,
+        ssl:{
+            rejectUnauthorized: true,  // No rechaza SSL sin autorizacion
+        },
     });
 } 
 
