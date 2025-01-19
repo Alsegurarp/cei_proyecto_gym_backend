@@ -7,33 +7,23 @@ import {
   editarStatus
 } from './database.js';
 import cors from 'cors';
-import pkg from 'pg'; // Usamos import por defecto
-const { Client } = pkg;
-import dotenv from 'dotenv'; //variables de entorno
+import postgres from 'postgres'; 
+import dotenv from "dotenv";
+
 dotenv.config();
 
-
-const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
-  
-  // Conecta a la base de datos
-  client.connect()
-    .then(() => console.log("Conexión exitosa a la base de datos"))
-    .catch((err) => console.error("Error de conexión:", err))
-    .finally(() => client.end());
-
-
 const app = express();
+const PORT = process.env.PORT || 4000;
+
+
+const sql = postgres(process.env.DATABASE_URL, {
+    ssl: { rejectUnauthorized: false }
+  });
 
 // Habilitar CORS
 app.use(cors());
+app.use(express.json()); // Middleware para parsear JSON
 
-// Middleware para parsear JSON
-app.use(express.json());
 
 app.get('/', (req, res) => {
     res.redirect('/rutinas');
@@ -41,7 +31,8 @@ app.get('/', (req, res) => {
 
 app.use(cors({
     origin: ["http://localhost:3000", "http://localhost:4000"],
-}));
+}));//solicitudes entre el frontend y el backend a través de HTTP.
+
 
 // Rutas
 app.get('/rutinas', async (req, res) => {
@@ -128,7 +119,7 @@ app.delete('/rutinas/:id', async (req, res) => {
   });
   
 // Iniciar el servidor
-const PORT = process.env.PORT || 4000;
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
