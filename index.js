@@ -13,7 +13,7 @@ import postgres from 'postgres';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const port = process.env.PORT || 4000;
 
 // Updated PostgreSQL connection with correct SSL configuration for Render
 
