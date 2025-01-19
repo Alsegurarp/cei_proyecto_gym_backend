@@ -7,6 +7,21 @@ import {
   editarStatus
 } from './database.js';
 import cors from 'cors';
+const { Client } = require('pg');
+
+const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  });
+  
+  // Conecta a la base de datos
+  client.connect()
+    .then(() => console.log("Conexión exitosa a la base de datos"))
+    .catch((err) => console.error("Error de conexión:", err))
+    .finally(() => client.end());
+
 
 const app = express();
 
