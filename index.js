@@ -25,6 +25,10 @@ function conectar(){
         database: process.env.DB_NAME,
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
+        ssl: {
+            require: true,             // Asegura que la conexión esté protegida por SSL
+            rejectUnauthorized: false  // Si es necesario, puedes ajustar esto dependiendo de la configuración del servidor
+        },
     })
 } 
 
